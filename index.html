@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>尘白禁区信源研析</title>
+  <script src="https://cdn.bootcdn.net/ajax/libs/vue/3.2.47/vue.global.prod.min.js"></script>
+  <script src="./calc.min.js"></script>
+</head>
+
+<body>
+  <a href="https://space.bilibili.com/277401945" target="_blank">Bilibili 方形的块状代码</a>
+  <div id="app">
+    <p>行数：<input type="text" v-model="row" /></p>
+    <p>列数：<input type="text" v-model="col" /></p>
+    <input type="button" value="确定" @click="confirmBoard">
+    <p>红色表示需要摆放的格子，白色表示这里没有格子，点击切换</p>
+    <div v-for="(r, i) in board" style="height: 32px;">
+      <div
+        class="box"
+        v-for="(c, j) in r"
+        @click="tuneBox(i, j)"
+        :style="{ 'background-color': c === 0 ? 'white' : 'red' }"
+      ></div>
+    </div>
+    <div v-if="board.length" style="margin-top: 8px;">
+      <p v-for="(b, i) in num">方块{{ i + 1 }}个数：<input type="text" v-model.number="num[i]" /></p>
+      <input type="button" value="计算完美方案" @click="calc">
+    </div>
+    <div v-if="res !== false">
+      <p>方案数：{{ res.length }}</p>
+    </div>
+    <div v-if="res.length">
+      <p>当前展示方案：{{ now + 1 }} / {{ res.length }}</p>
+      <input type="button" value="<-" @click="now -= (now > 0)">
+      <input type="button" value="->" @click="now += (now + 1 < res.length)">
+      <div v-for="(r, i) in sol" style="height: 32px;">
+        <div
+          class="box"
+          v-for="(c, j) in r"
+          :style="{ 'background-color': color[c] }"
+        >{{ c }}</div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const { createApp } = Vue
+    createApp({
+      data() {
+        return {
+          row: 5,
+          col: 6,
+          board: [],
+          num: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+          res: false,
+          now: 0,
+          color: ['white', '#75C0FF', '#3B66CF', '#78ACC5', '#C8FAFD', '#FDFF00', '#4BFF00', '#FF9800', '#B9B24B', '#FF00AE']
+        }
+      },
+      methods: {
+        confirmBoard() {
+          const row = Number(this.row)
+          const col = Number(this.col)
+          this.board = new Array(row)
+          for (let i = 0; i < row; ++i) {
+            const r = new Array(col).fill(-1)
+            this.board[i] = r
+          }
+        },
+        tuneBox(x, y) {
+          if (this.board[x][y] === -1) {
+            this.board[x][y] = 0
+          } else {
+            this.board[x][y] = -1
+          }
+        },
+        calc() {
+          this.res = Solve(this.board, this.num)
+          this.now = 0
+        }
+      },
+      computed: {
+        sol() {
+          return this.res[this.now]
+        }
+      }
+    }).mount('#app')
+  </script>
+  <style>
+    p {
+      margin: 4px 0;
+    }
+    .box {
+      display: inline-block;
+      box-sizing: border-box;
+      width: 32px;
+      height: 32px;
+      border: 1px black solid;
+      cursor: pointer;
+    }
+  </style>
+</body>
+
+</html>
