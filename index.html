@@ -25,16 +25,29 @@
       ></div>
     </div>
     <div v-if="board.length" style="margin-top: 8px;">
-      <p v-for="(b, i) in num">方块{{ i + 1 }}个数：<input type="text" v-model.number="num[i]" /></p>
+      <table>
+        <tr v-for="row in 5" :key="row">
+          <td v-for="col in 2" :key="col" v-if="!(row === 5 && col === 2)">
+            <template v-if="!(row === 5 && col === 2)">
+              信源 {{ (row-1)*2+col }} 数量: 
+              <input type="text" v-model.number="num[(row-1)*2+col-1]" />
+              <input type="checkbox" 
+                v-model="selected[(row-1)*2+col-1]" 
+                :title="'信源 ' + ((row-1)*2+col) + ' 必选'"
+                @click="select((row-1)*2+col-1)"/>
+            </template>
+          </td>
+        </tr>
+      </table>
       <input type="button" value="计算完美方案" @click="calc">
     </div>
     <div v-if="res !== false">
-      <p>方案数：{{ res.length }}</p>
+      <p>方案数：{{ selectResult.length }}/{{ res.length }}</p>
     </div>
-    <div v-if="res.length">
-      <p>当前展示方案：{{ now + 1 }} / {{ res.length }}</p>
+    <div v-if="selectResult.length">
+      <p>当前展示方案：{{ now + 1 }} / {{ selectResult.length }}</p>
       <input type="button" value="<-" @click="now -= (now > 0)">
-      <input type="button" value="->" @click="now += (now + 1 < res.length)">
+      <input type="button" value="->" @click="now += (now + 1 < selectResult.length)">
       <div v-for="(r, i) in sol" style="height: 32px;">
         <div
           class="box"
@@ -52,8 +65,10 @@
           row: 5,
           col: 6,
           board: [],
-          num: [0, 0, 0, 0, 0, 0, 0, 0, 0],
+          num: new Array(9).fill(0),
+          selected: new Array(9).fill(false),
           res: false,
+          selectResult: false,
           now: 0,
           color: ['white', '#75C0FF', '#3B66CF', '#78ACC5', '#C8FAFD', '#FDFF00', '#4BFF00', '#FF9800', '#B9B24B', '#FF00AE']
         }
@@ -78,11 +93,44 @@
         calc() {
           this.res = Solve(this.board, this.num)
           this.now = 0
+          this.filter();
+        },
+        filter(requiredInfoIds) {
+          if(!this.res){
+            return;
+          }
+
+          if(!requiredInfoIds){
+            requiredInfoIds = this.selected.map((v,i)=>v?i+1:-1).filter(v => v !== -1);
+          }
+          console.log("filter array:",requiredInfoIds);
+          if(requiredInfoIds.length == 0){
+            this.selectResult = this.res;
+            return;
+          }
+          this.selectResult = this.res.filter(function(result){
+            let temp = [].concat(...result);
+            for(let i=0;i<requiredInfoIds.length;++i){
+              if(!temp.includes(requiredInfoIds[i])){
+                return false;
+              }
+            }
+            return true;
+          });
+        },
+        select(index) {
+          let requiredInfoIds = new Array();
+          this.selected.forEach((isSelect, i) => {
+            if(isSelect && i!=index || !isSelect && i==index){
+              requiredInfoIds.push(i+1);
+            }
+          });
+          this.filter(requiredInfoIds);
         }
       },
       computed: {
         sol() {
-          return this.res[this.now]
+          return this.selectResult[this.now]
         }
       }
     }).mount('#app')
