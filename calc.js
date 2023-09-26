@@ -109,6 +109,33 @@ const blocks = [
     [
       [9]
     ]
+  ],
+  [
+    [
+      [10, 10]
+    ],
+    [
+      [10],
+      [10]
+    ]
+  ],
+  [
+    [
+      [11, 11],
+      [11, 0],
+    ],
+    [
+      [11, 11],
+      [0, 11],
+    ],
+    [
+      [0, 11],
+      [11, 11],
+    ],
+    [
+      [11, 0],
+      [11, 11],
+    ],
   ]
 ];
 
@@ -164,23 +191,28 @@ function dfs(p) {
       x[i] = a[i].map(x => x);
     }
     res.push(x);
-    return;
+    if (res.length >= 10000) {
+      alert('方案数太多，仅计算前一万种。减少一些方块吧~');
+      return true;
+    }
+    return false;
   }
   const x = Math.floor(p / n), y = p % n;
   if (a[x][y] !== -1) {
-    dfs(p + 1);
-    return;
+    if (dfs(p + 1)) return true;
+    return false;
   }
-  for (let b = 0; b < 9; ++b) {
+  for (let b = 0; b < blocks.length; ++b) {
     if (!l[b]) continue;
     for (let d = 0; d < blocks[b].length; ++d) {
       if (!canPlaceBlock(x, y, b, d)) continue;
       placeBlock(x, y, b, d, b + 1);
       --l[b];
-      dfs(p + 1);
+      if (dfs(p + 1)) return true;
       ++l[b];
       placeBlock(x, y, b, d, -1);
     }
   }
+  return false;
 }
 
