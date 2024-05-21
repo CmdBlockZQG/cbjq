@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>尘白禁区信源研析</title>
   <script src="https://cdn.bootcdn.net/ajax/libs/vue/3.2.47/vue.global.prod.min.js"></script>
-  <script src="./calc.js"></script>
+  <script src="./calc.min.js"></script>
 </head>
 
 <body>
@@ -77,7 +77,6 @@
         },
         calc() {
           this.res = Solve(this.board, this.num)
-          console.log(this.res)
           this.now = 0
         }
       },
