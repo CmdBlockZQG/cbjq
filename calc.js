@@ -155,21 +155,6 @@ function Solve(arr, num) {
 
   dfs(0);
 
-  // Sort res by the number of distinct elements in each matrix, in descending order
-  // If the number of distinct elements is the same, sort by the highest number in l for each element used in A and B
-  res.sort((A, B) => {
-    let distinctA = new Set(A.flat()).size;
-    let distinctB = new Set(B.flat()).size;
-
-    if (distinctA !== distinctB) {
-      return distinctB - distinctA;
-    } else {
-      let maxA = Math.max(...A.flat().map(x => l[x-1]));
-      let maxB = Math.max(...B.flat().map(x => l[x-1]));
-      return maxB - maxA;
-    }
-  });
-
   return res;
 }
 

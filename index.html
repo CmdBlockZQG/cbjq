@@ -52,7 +52,7 @@
           row: 5,
           col: 6,
           board: [],
-          num: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+          num: new Array(11).fill(0),
           res: false,
           now: 0,
           color: ['white', '#75C0FF', '#3B66CF', '#78ACC5', '#C8FAFD', '#FDFF00', '#4BFF00', '#FF9800', '#B9B24B', '#FF00AE', '#8A2BE2', '#FF00FF']
@@ -76,7 +76,68 @@
           }
         },
         calc() {
-          this.res = Solve(this.board, this.num)
+          const num_8 = new Array(11).fill(0)
+          num_8[7] = Number(this.num[7])
+          num_8[8] = Number(this.row) * Number(this.col)
+          const num_n8 = this.num.map(el => el)
+          num_n8[7] = 0
+
+          const board_8 = Solve(this.board, num_8)
+          let mapped = board_8.map((el, i) => {
+            return { index: i, value: (el.flat().filter(el => el === 8).length / 5) }
+          })
+          mapped.sort((a, b) => b.value - a.value)
+
+          let sorted = []
+          let s_max8 = []
+          let c_8 = mapped[0].value
+          while (c_8 >= 0) {
+            sorted = mapped.filter(el => el.value === c_8).map(el => board_8[el.index])
+            for (let s = 0; s < sorted.length ; ++s) {
+              for (let r = 0; r < Number(this.row); ++r) {
+                sorted[s][r].forEach((el, i, arr) => {
+                  if (arr[i] === 9) arr[i] = -1
+                })
+              }
+              let s_min9 = []
+              for (let c_9 = 0; c_9 <= Number(this.num[8]); ++c_9) {
+                num_n8[8] = c_9
+                s_min9 = s_min9.concat(Solve(sorted[s], num_n8))
+                if (s_min9.length > 0) break
+              }
+              s_max8 = s_max8.concat(s_min9)
+            }
+            if (s_max8.length > 0) break
+            --c_8
+          }
+
+  // Sort res by the number of distinct elements in each matrix, in descending order
+  // If the number of distinct elements is the same,
+  // sort by the highest number in l for each element used in A and B
+          s_max8.sort((A, B) => {
+            let distinctA = new Set(A.flat()).size
+            let distinctB = new Set(B.flat()).size
+
+            if (distinctA !== distinctB) {
+              return distinctB - distinctA
+            } else {
+              let maxA = Math.max(...A.flat().map(x => this.num[x-1]))
+              let maxB = Math.max(...B.flat().map(x => this.num[x-1]))
+              return maxB - maxA
+            }
+          })
+
+          //let c_nAB = 0
+          s_max8.sort((a, b) => {
+            return (a.flat().filter(el => el === 10).length / 2 + a.flat().filter(el => el === 11).length / 3) - (b.flat().filter(el => el === 10).length / 2 + b.flat().filter(el => el === 11).length / 3)
+          })
+          s_max8.sort((a, b) => a.flat().filter(el => el === 9).length - b.flat().filter(el => el === 9).length)
+          /*s_max8.forEach((el, i, arr) => {
+            if ( !(el.flat().includes(10)) && !(el.flat().includes(11)) ) ++c_nAB
+          })*/
+          //console.log(c_nAB)
+
+          this.res = s_max8
           this.now = 0
         }
       },
