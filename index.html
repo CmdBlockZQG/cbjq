@@ -102,7 +102,19 @@
               let s_min9 = []
               for (let c_9 = 0; c_9 <= Number(this.num[8]); ++c_9) {
                 num_n8[8] = c_9
-                s_min9 = s_min9.concat(Solve(sorted[s], num_n8))
+                let rf_base = Math.max(...num_n8.slice(0,-4))
+                let s_rf = []
+                for (let rf = 0; rf <= rf_base; ++rf) {
+                  let num_rf = num_n8.map(el => el)
+                  for (let i = 0; i < num_rf.length - 4; ++i) {
+                    num_rf[i] -= (rf_base - rf)
+                    if (num_rf[i] < 0) num_rf[i] = 0
+                  }
+                  //console.log(num_rf)
+                  s_rf = s_rf.concat(Solve(sorted[s], num_rf))
+                  if (s_rf.length > 0) break
+                }
+                s_min9 = s_min9.concat(s_rf)
                 if (s_min9.length > 0) break
               }
               s_max8 = s_max8.concat(s_min9)
@@ -127,15 +139,10 @@
             }
           })
 
-          //let c_nAB = 0
           s_max8.sort((a, b) => {
-            return (a.flat().filter(el => el === 10).length / 2 + a.flat().filter(el => el === 11).length / 3) - (b.flat().filter(el => el === 10).length / 2 + b.flat().filter(el => el === 11).length / 3)
+            return (b.flat().filter(el => el === 10).length / 2 + b.flat().filter(el => el === 11).length / 3) - (a.flat().filter(el => el === 10).length / 2 + a.flat().filter(el => el === 11).length / 3)
           })
           s_max8.sort((a, b) => a.flat().filter(el => el === 9).length - b.flat().filter(el => el === 9).length)
-          /*s_max8.forEach((el, i, arr) => {
-            if ( !(el.flat().includes(10)) && !(el.flat().includes(11)) ) ++c_nAB
-          })*/
-          //console.log(c_nAB)
 
           this.res = s_max8
           this.now = 0
